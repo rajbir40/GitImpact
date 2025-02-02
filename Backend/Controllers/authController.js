@@ -62,7 +62,7 @@ export async function githubCallback(req,res){
 // https://github.com/octokit/core.js#readme
 export async function getUserData() {
 
-    const access_token = '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';
+    const access_token = process.env.GITHUB_ACCESS_TOKEN;
 
     const octokit = new Octokit({
         auth: access_token  // Use env variables instead
