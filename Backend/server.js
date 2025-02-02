@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import http from "http";
 // import initializeSocket from "./Services/socketService.js";
 import authRoutes from "./Routes/authRoutes.js";
+import repoRoutes from "./Routes/repoRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -42,6 +43,8 @@ app.get("/api/health", async (req, res) => {
 
 // Use routes
 app.use("/api/auth", authRoutes);
+app.use("/api/repo", repoRoutes);
+
 
 // Catch-all for undefined routes
 app.use((req, res, next) => {
