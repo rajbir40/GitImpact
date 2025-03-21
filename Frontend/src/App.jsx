@@ -3,7 +3,6 @@ import Signup from './User Tools/Signup';
 import UserProfile from './User Tools/Profile';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Home from './User Tools/Home/Home'
-import News from './News/news'
 import Navbar from './User Tools/Navbar';
 import Predict from './User Tools/Predict';
 import Inventory from './User Tools/Inventory';
@@ -15,7 +14,6 @@ function App() {
       <Navbar/>
      <Routes>
       <Route path="/" element={<Home/>} />
-      <Route path="/news" element={<News/>} />
       <Route path='/signup' element={<Signup/>}/>
       <Route path='/login' element={<Login/>}/>
       <Route path='/profile' element={<UserProfile/>}/>

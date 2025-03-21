@@ -1,256 +1,147 @@
-import React, { useState, useRef } from "react";
-import { FiEdit2, FiCheck, FiX, FiUpload } from "react-icons/fi";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Avatar } from "@/components/ui/avatar";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Github, Link2, Users, Star, GitFork } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const UserProfile = () => {
-  const [isEditing, setIsEditing] = useState(false);
-  const [imagePreview, setImagePreview] = useState("https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=400&h=400&fit=crop");
-  const fileInputRef = useRef(null);
+const ProfilePage = () => {
+  // Sample data - would come from your API
+  const activityData = [
+    { month: 'Jan', prs: 12, issues: 8, loc: 1200 },
+    { month: 'Feb', prs: 15, issues: 10, loc: 1500 },
+    { month: 'Mar', prs: 8, issues: 12, loc: 800 },
+    { month: 'Apr', prs: 20, issues: 15, loc: 2000 },
+  ];
 
-  const [formData, setFormData] = useState({
-    fullName: "John Doe",
-    email: "john.doe@example.com",
-    phone: "+1 234 567 8900",
-    bio: "Professional software developer with expertise in React and modern web technologies.",
-    country: "United States",
-    city: "San Francisco",
-    state: "California",
-    postalCode: "94105",
-    socialLinks: {
-      linkedin: "linkedin.com/johndoe",
-      twitter: "twitter.com/johndoe",
-      github: "github.com/johndoe"
-    }
-  });
+  const repositories = [
+    { name: 'awesome-project', stars: 120, forks: 35, description: 'A groundbreaking open source project' },
+    { name: 'cool-library', stars: 89, forks: 22, description: 'Useful utility functions for developers' },
+  ];
 
-  const [errors, setErrors] = useState({});
-
-  const validateForm = () => {
-    const newErrors = {};
-    if (formData.fullName.length < 2) {
-      newErrors.fullName = "Name must be at least 2 characters long";
-    }
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
-    }
-    if (formData.bio.length > 250) {
-      newErrors.bio = "Bio must not exceed 250 characters";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleSubmit = () => {
-    if (validateForm()) {
-      toast.success("Profile updated successfully!");
-      setIsEditing(false);
-    }
-  };
+  const achievements = [
+    { name: 'Super Contributor', description: '100+ PRs merged' },
+    { name: 'Bug Hunter', description: '50+ issues resolved' },
+    { name: 'Team Player', description: 'Collaborated with 20+ developers' },
+  ];
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <ToastContainer />
-      <div className="max-w-4xl mx-auto bg-card rounded-lg shadow-lg p-6 md:p-8">
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-heading font-heading text-foreground" style={{color: 'darkblue',fontWeight: 900,fontSize: 'xx-large'}}>Profile Information</h1>
-          <button
-            onClick={() => isEditing ? handleSubmit() : setIsEditing(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:opacity-90 transition-opacity"
-            style={{fontWeight: 400,
-                  borderRadius: '34px',
-                  color: 'white',
-                  backgroundColor: 'rgb(13, 110, 253)'}}
-          >
-            {isEditing ? (
-              <>
-                <FiCheck /> Save Changes
-              </>
-            ) : (
-              <>
-                <FiEdit2 /> Edit Profile
-              </>
-            )}
-          </button>
-        </div>
-
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="md:col-span-1">
-            <div className="flex flex-col items-center">
-              <div className="relative w-48 h-48 mb-4">
-                <img
-                  src={imagePreview}
-                  alt="Profile"
-                  className="w-full h-full object-cover rounded-full"
-                />
-                {isEditing && (
-                  <button
-                    onClick={() => fileInputRef.current.click()}
-                    className="absolute bottom-2 right-2 p-2 bg-primary text-primary-foreground rounded-full hover:opacity-90 transition-opacity"
-                  >
-                    <FiUpload />
-                  </button>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </div>
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-start gap-6 bg-white rounded-lg p-6 shadow-lg"
+      >
+        <Avatar className="w-24 h-24">
+          <img src="/api/placeholder/96/96" alt="Profile" className="rounded-full" />
+        </Avatar>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Sarah Developer</h1>
+          <p className="text-gray-600">Senior Software Engineer passionate about open source</p>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <Users size={16} />
+              <span>1.2k followers</span>
             </div>
-          </div>
-
-          <div className="md:col-span-2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                    className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} ${errors.fullName ? "border-destructive" : "border-input"}`}
-                  />
-                  {errors.fullName && (
-                    <p className="text-destructive text-sm mt-1">{errors.fullName}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                    className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} ${errors.email ? "border-destructive" : "border-input"}`}
-                  />
-                  {errors.email && (
-                    <p className="text-destructive text-sm mt-1">{errors.email}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                    Phone
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                    className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} border-input`}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                    Country
-                  </label>
-                  <input
-                    type="text"
-                    name="country"
-                    value={formData.country}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                    className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} border-input`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                    City
-                  </label>
-                  <input
-                    type="text"
-                    name="city"
-                    value={formData.city}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                    className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} border-input`}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                    Postal Code
-                  </label>
-                  <input
-                    type="text"
-                    name="postalCode"
-                    value={formData.postalCode}
-                    onChange={handleInputChange}
-                    disabled={!isEditing}
-                    style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                    className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} border-input`}
-                  />
-                </div>
-              </div>
+            <div className="flex items-center gap-2">
+              <Github size={16} />
+              <a href="#" className="text-blue-600">@sarahdev</a>
             </div>
-
-            <div className="mt-6">
-              <label className="block text-sm font-body text-accent mb-1" style={{color:'gray', fontWeight:'bold'}}>
-                Bio
-              </label>
-              <textarea
-                name="bio"
-                style={{borderRadius:'4px', backgroundColor:'#e8e6e6', borderColor:'gray'}}
-                value={formData.bio}
-                onChange={handleInputChange}
-                disabled={!isEditing}
-                rows="4"
-                className={`w-full p-2 border rounded-md ${isEditing ? "bg-white" : "bg-secondary"} ${errors.bio ? "border-destructive" : "border-input"}`}
-              />
-              <div className="flex justify-between mt-1">
-                <span className="text-sm text-accent">
-                  {formData.bio.length}/250 characters
-                </span>
-                {errors.bio && (
-                  <p className="text-destructive text-sm">{errors.bio}</p>
-                )}
-              </div>
+            <div className="flex items-center gap-2">
+              <Link2 size={16} />
+              <a href="#" className="text-blue-600">portfolio.dev</a>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
+
+      {/* Contribution Score */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Contribution Score</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-4xl font-bold text-center text-green-600">856</div>
+          <p className="text-center text-gray-600 mt-2">Based on impact and collaboration</p>
+        </CardContent>
+      </Card>
+
+      {/* Activity Graph */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Activity Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={activityData}>
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="prs" stroke="#8884d8" />
+                <Line type="monotone" dataKey="issues" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="loc" stroke="#ffc658" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Top Repositories */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Top Repositories</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {repositories.map((repo) => (
+              <div key={repo.name} className="p-4 border rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg">{repo.name}</h3>
+                    <p className="text-gray-600">{repo.description}</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-1">
+                      <Star size={16} />
+                      <span>{repo.stars}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <GitFork size={16} />
+                      <span>{repo.forks}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Achievements */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Badges & Achievements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {achievements.map((achievement) => (
+              <motion.div
+                key={achievement.name}
+                whileHover={{ scale: 1.05 }}
+                className="p-4 border rounded-lg text-center"
+              >
+                <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto mb-2" />
+                <h3 className="font-semibold">{achievement.name}</h3>
+                <p className="text-sm text-gray-600">{achievement.description}</p>
+              </motion.div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default UserProfile;
+export default ProfilePage;

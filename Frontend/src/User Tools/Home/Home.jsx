@@ -1,141 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { 
-  Home, 
-  Shield, 
-  Users, 
-  Bell, 
-  MapPin, 
-  HandHelping 
-} from 'lucide-react';
-import { Button } from "@/components/ui/button";
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import { 
-  NavigationMenu, 
-  NavigationMenuItem, 
-  NavigationMenuList,
-  NavigationMenuLink 
-} from "@/components/ui/navigation-menu";
-import { Dialog, DialogTrigger, DialogContent } from "@/components/ui/dialog";
+import { Avatar } from "@/components/ui/avatar";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import { Github, Link2, Users, Star, GitFork } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const DisasterResponseHomePage = () => {
-  const [alerts, setAlerts] = useState([]);
+const ProfilePage = () => {
+  // Sample data - would come from your API
+  const activityData = [
+    { month: 'Jan', prs: 12, issues: 8, loc: 1200 },
+    { month: 'Feb', prs: 15, issues: 10, loc: 1500 },
+    { month: 'Mar', prs: 8, issues: 12, loc: 800 },
+    { month: 'Apr', prs: 20, issues: 15, loc: 2000 },
+  ];
 
-  useEffect(() => {
-    const fetchAlerts = async () => {
-      const mockAlerts = [
-        { id: 1, type: 'Earthquake', location: 'California', severity: 'High' },
-        { id: 2, type: 'Hurricane', location: 'Florida Coast', severity: 'Medium' }
-      ];
-      setAlerts(mockAlerts);
-    };
+  const repositories = [
+    { name: 'awesome-project', stars: 120, forks: 35, description: 'A groundbreaking open source project' },
+    { name: 'cool-library', stars: 89, forks: 22, description: 'Useful utility functions for developers' },
+  ];
 
-    fetchAlerts();
-  }, []);
+  const achievements = [
+    { name: 'Super Contributor', description: '100+ PRs merged' },
+    { name: 'Bug Hunter', description: '50+ issues resolved' },
+    { name: 'Team Player', description: 'Collaborated with 20+ developers' },
+  ];
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Navigation */}
-      
-
-      {/* Hero Section */}
-      <header className="container mx-auto text-center py-20 space-y-6">
-        <h2 className="text-5xl font-bold">Respond. Recover. Rebuild.</h2>
-        <p className="text-xl text-muted-foreground">Empowering communities in times of crisis</p>
-        <Button size="lg" className="mt-6">Get Started</Button>
-      </header>
-
-      <Separator />
-
-      {/* Features Overview */}
-      <section className="container mx-auto py-16 space-y-12">
-        <h3 className="text-3xl text-center font-semibold">Our Key Features</h3>
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            { 
-              icon: Shield, 
-              title: "AI Disaster Prediction", 
-              description: "Advanced AI technology to forecast and mitigate potential disasters.",
-              color: "text-blue-600"
-            },
-            { 
-              icon: MapPin, 
-              title: "Inventory Management", 
-              description: "Real-time tracking of resources and supplies for efficient distribution.",
-              color: "text-green-600"
-            },
-            { 
-              icon: Users, 
-              title: "Volunteer Management", 
-              description: "Connect volunteers with critical disaster response efforts.",
-              color: "text-purple-600"
-            }
-          ].map((feature, index) => (
-            <Card key={index} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
-                <feature.icon className={`mx-auto mb-4 ${feature.color}`} size={64} />
-                <CardTitle className="text-center">{feature.title}</CardTitle>
-              </CardHeader>
-              <CardContent className="text-center">
-                <p className="text-muted-foreground">{feature.description}</p>
-              </CardContent>
-            </Card>
-          ))}
+    <div className="max-w-6xl mx-auto p-6 space-y-6">
+      {/* Header Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex items-start gap-6 bg-white rounded-lg p-6 shadow-lg"
+      >
+        <Avatar className="w-24 h-24">
+          <img src="/api/placeholder/96/96" alt="Profile" className="rounded-full" />
+        </Avatar>
+        <div className="space-y-2">
+          <h1 className="text-2xl font-bold">Sarah Developer</h1>
+          <p className="text-gray-600">Senior Software Engineer passionate about open source</p>
+          <div className="flex gap-4">
+            <div className="flex items-center gap-2">
+              <Users size={16} />
+              <span>1.2k followers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Github size={16} />
+              <a href="#" className="text-blue-600">@sarahdev</a>
+            </div>
+            <div className="flex items-center gap-2">
+              <Link2 size={16} />
+              <a href="#" className="text-blue-600">portfolio.dev</a>
+            </div>
+          </div>
         </div>
-      </section>
+      </motion.div>
 
-      {/* Real-Time Alerts */}
-      <section className="bg-secondary/10 py-16">
-        <div className="container mx-auto space-y-12">
-          <h3 className="text-3xl text-center font-semibold">Current Disaster Alerts</h3>
-          <div className="grid md:grid-cols-2 gap-6">
-            {alerts.map(alert => (
-              <Card key={alert.id}>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <CardTitle>{alert.type} Alert</CardTitle>
-                  <Badge variant="destructive">{alert.severity}</Badge>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center space-x-4">
-                    <Bell className="text-destructive" size={48} />
-                    <div>
-                      <p>Location: {alert.location}</p>
+      {/* Contribution Score */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Contribution Score</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-4xl font-bold text-center text-green-600">856</div>
+          <p className="text-center text-gray-600 mt-2">Based on impact and collaboration</p>
+        </CardContent>
+      </Card>
+
+      {/* Activity Graph */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Activity Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={activityData}>
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Line type="monotone" dataKey="prs" stroke="#8884d8" />
+                <Line type="monotone" dataKey="issues" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="loc" stroke="#ffc658" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Top Repositories */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Top Repositories</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {repositories.map((repo) => (
+              <div key={repo.name} className="p-4 border rounded-lg">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-semibold text-lg">{repo.name}</h3>
+                    <p className="text-gray-600">{repo.description}</p>
+                  </div>
+                  <div className="flex gap-4">
+                    <div className="flex items-center gap-1">
+                      <Star size={16} />
+                      <span>{repo.stars}</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <GitFork size={16} />
+                      <span>{repo.forks}</span>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
+                </div>
+              </div>
             ))}
           </div>
-        </div>
-      </section>
+        </CardContent>
+      </Card>
 
-      {/* Footer */}
-      <footer className="bg-secondary text-secondary-foreground py-12">
-        <div className="container mx-auto grid md:grid-cols-3 gap-8">
-          <div>
-            <h4 className="text-xl font-bold mb-4">Quick Links</h4>
-            <div className="space-y-2">
-              <Button variant="link" className="text-left">Privacy Policy</Button>
-              <Button variant="link" className="text-left">Terms of Service</Button>
-            </div>
+      {/* Achievements */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Badges & Achievements</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {achievements.map((achievement) => (
+              <motion.div
+                key={achievement.name}
+                whileHover={{ scale: 1.05 }}
+                className="p-4 border rounded-lg text-center"
+              >
+                <div className="w-12 h-12 bg-purple-100 rounded-full mx-auto mb-2" />
+                <h3 className="font-semibold">{achievement.name}</h3>
+                <p className="text-sm text-gray-600">{achievement.description}</p>
+              </motion.div>
+            ))}
           </div>
-          <div>
-            <h4 className="text-xl font-bold mb-4">Connect With Us</h4>
-            <div className="flex space-x-4">
-              <Button variant="outline">Facebook</Button>
-              <Button variant="outline">Twitter</Button>
-            </div>
-          </div>
-          <div>
-            <h4 className="text-xl font-bold mb-4">Contact</h4>
-            <p>support@disasterresponse.org</p>
-            <p>1-800-DISASTER</p>
-          </div>
-        </div>
-      </footer>
+        </CardContent>
+      </Card>
     </div>
   );
 };
 
-export default DisasterResponseHomePage;
+export default ProfilePage;
