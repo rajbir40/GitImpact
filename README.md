@@ -3,10 +3,8 @@
 ## 📌 Overview
 GitHub Contribution Analyzer helps developers measure the **actual impact** of their contributions rather than just commit count. It provides detailed insights into meaningful contributions, including:
 - **Lines of Code (LOC) added/removed**
-- **Files changed**
 - **Pull Requests (PRs) merged**
 - **Issues resolved**
-- **Commit message relevance**
 
 With a visually appealing **developer profile page**, this project allows users to track their GitHub activity in a more meaningful way. 🎯
 
@@ -16,28 +14,23 @@ With a visually appealing **developer profile page**, this project allows users 
 ✅ **Impact-Based Contribution Score** – Ranks users based on real contributions, not just commits.
 ✅ **Activity Breakdown** – View **LOC changes, PRs, issues, and commits**.
 ✅ **Top Repository Contributions** – Identify repositories where the most impact was made.
-✅ **Collaboration Network Graph** – See frequent collaborators and contributions across teams.
 ✅ **Gamification & Badges** – Earn badges for meaningful contributions.
-✅ **Auto-Generated Developer Portfolio** – Showcase GitHub activity as a resume.
-✅ **Weekly/Monthly Contribution Reports** – Stay updated on your progress.
-✅ **Dark Mode & Custom Themes** – Improve UX with an elegant interface.
 
 ---
 
 ## 🔧 Tech Stack
 ### **Backend:**
 - **Node.js & Express.js** – Handles API requests.
-- **MongoDB & Mongoose** – Stores user profiles & contribution data.
+- **MongoDB** – Stores user profiles & contribution data.
 - **GitHub OAuth** – Authentication via GitHub API.
 
 ### **Frontend:**
 - **React + TailwindCSS** – For a clean, modern UI.
 - **Recharts/D3.js** – Visual graphs for contribution analysis.
-- **Framer Motion** – Smooth animations.
 - **ShadCN/UI or Material UI** – Professional UI components.
 
 ### **APIs & Tools:**
-- **GitHub REST & GraphQL APIs** – Fetch contribution details.
+- **GitHub REST** – Fetch contribution details.
 - **OAuth 2.0** – Secure authentication.
 
 ---
