@@ -6,9 +6,6 @@ import { calculateTotalUserLOC } from "./repoController.js";
 
 dotenv.config();
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-const OWNER = "opencodeiiita";
-const REPO = "SponsoHive-Backend";
-const username = "rajbir40";
 
 const octokit = new Octokit({
   auth: GITHUB_ACCESS_TOKEN,
@@ -19,33 +16,33 @@ export async function fetchTotalLoc(req, res) {
   try {
     let totalLoc = 0;
     const repositories = await Repository.find({ owner: userid , fork:false})
-      .sort({ pushed_at: -1 }) // Sort by most recently pushed
-      .limit(5); // Limit to latest 5
+      .sort({ pushed_at: -1 }) 
+      // .limit(5);
 
        const forkedRepos = await Repository.find({ owner: userid , fork:true})
-      .sort({ pushed_at: -1 }) // Sort by most recently pushed
-      .limit(5); // Limit to latest 5
+      .sort({ pushed_at: -1 }) 
+      // .limit(5);
 
     const parent = await fetchReposWithParentInfo(forkedRepos);
     
-    return res.json(parent);
+    // return res.json(parent);
 
-    // for (const repo of repositories) {
-    //   console.log(`Processing commit: ${repo.name}`);
-    //   console.log(repo.owner);
-    //   const loc = await calculateTotalUserLOC(repo.owner, repo.name,userid);
-    //   totalLoc += loc;
-    // }
+    for (const repo of repositories) {
+      console.log(`Processing commit: ${repo.name}`);
+      console.log(repo.owner);
+      const loc = await calculateTotalUserLOC(repo.owner, repo.name,userid);
+      totalLoc += loc;
+    }
 
-    // for (const par of parent) {
-    //   const [owner] = par.parentFullName.split("/"); // Get string before "/"
-    //   console.log(`Processing commit: ${par.name}`);
-    //   console.log(owner);
-    //   const loc = await calculateTotalUserLOC(owner, par.name, userid);
-    //   totalLoc += loc;
-    // }
+    for (const par of parent) {
+      const [owner] = par.parentFullName.split("/"); 
+      console.log(`Processing commit: ${par.name}`);
+      console.log(owner);
+      const loc = await calculateTotalUserLOC(owner, par.name, userid);
+      totalLoc += loc;
+    }
 
-    // return res.json(totalLoc);
+    return res.json(totalLoc);
     // return res.json(repositories);
   } catch (err) {
     console.log(err);

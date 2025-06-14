@@ -8,6 +8,8 @@ import http from "http";
 import authRoutes from "./Routes/authRoutes.js";
 import repoRoutes from "./Routes/repoRoutes.js";
 import contributionRoutes from "./Routes/contributionRoutes.js";
+import userRoutes from "./Routes/userRoutes.js";
+import prRoutes from "./Routes/prRoutes.js";
 
 // Load environment variables
 dotenv.config();
@@ -46,6 +48,8 @@ app.get("/api/health", async (req, res) => {
 app.use("/api/auth", authRoutes);
 app.use("/api/repo", repoRoutes);
 app.use("/api/contri", contributionRoutes);
+app.use("/api/user", userRoutes);
+app.use("/api/pr", prRoutes);
 
 
 // Catch-all for undefined routes

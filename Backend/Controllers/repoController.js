@@ -8,35 +8,40 @@ const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
 const OWNER = "rajbir40";
 const REPO = "GitImpact";
 
+
 export async function getUserRepositories(req, res) {
   const access_token = process.env.GITHUB_ACCESS_TOKEN;
+  const username = req.params.username;
 
   if (!access_token) {
     return res.status(400).json({ message: "Access token is required" });
   }
 
-  const octokit = new Octokit({
-    auth: access_token, // Use the token to authenticate
-  });
+  const octokit = new Octokit({ auth: access_token });
 
   try {
-    console.log("Fetching repositories...");
+    console.log("Fetching repositories for:", username);
 
-    // Fetch repositories from GitHub
-    const response = await octokit.request("GET /user/repos", {
-      headers: {
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    });
+    const response = await fetch(
+      `https://api.github.com/users/${username}/repos?per_page=100`,
+      {
+        headers: {
+          Authorization: `Bearer ${access_token}`,
+          Accept: "application/vnd.github+json",
+        },
+      }
+    );
 
-    const repositories = response.data; // Extract repositories
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.statusText}`);
+    }
 
-    // Process each repository and save to DB
+    const repositories = await response.json(); // ✅ Fix: Use .json() here
+
     for (const repo of repositories) {
-      let existingRepo = await Repository.findOne({ id: repo.id });
+      const existingRepo = await Repository.findOne({ id: repo.id });
 
       if (!existingRepo) {
-        // If repo doesn't exist, save to DB
         const newRepo = new Repository({
           id: repo.id,
           name: repo.name,
@@ -58,16 +63,17 @@ export async function getUserRepositories(req, res) {
           visibility: repo.visibility,
         });
 
-        await newRepo.save(); // Save to MongoDB
+        await newRepo.save();
       }
     }
 
-    return res.status(200).json(repositories); // Return repository data
+    return res.status(200).json(repositories);
   } catch (err) {
     console.error("Error fetching repositories:", err);
     return res.status(500).json({ message: "Failed to fetch repositories" });
   }
 }
+
 
 async function fetchAllCommits(owner, repo , username) {
   const url = `https://api.github.com/repos/${owner}/${repo}/commits`;

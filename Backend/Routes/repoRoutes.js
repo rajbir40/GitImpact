@@ -10,7 +10,7 @@ import {
 
 const router = express.Router();
 
-router.get("/fetch", getUserRepositories);
+router.get("/fetch/:username", getUserRepositories);
 router.get("/commit", calculateTotalUserLOC);
 router.get("/pull-requests", getPullRequestsInRepo);
 router.get("/pull-requests/:username", getPullrequestsByUser);

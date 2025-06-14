@@ -119,18 +119,8 @@ const radarData = [
     fullMark: 100,
   },
   {
-    subject: "Issues",
-    A: 65,
-    fullMark: 100,
-  },
-  {
     subject: "LOC",
     A: 90,
-    fullMark: 100,
-  },
-  {
-    subject: "Reviews",
-    A: 72,
     fullMark: 100,
   },
 ];
@@ -319,52 +309,6 @@ export default function GitHubDashboard() {
           <div className="lg:col-span-12 bg-gray-800 rounded-lg shadow-lg p-6">
             <h2 className="text-xl font-bold mb-6 text-blue-400">Activity Charts</h2>
             
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-4 text-gray-300">Code Contribution (LOC)</h3>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <BarChart
-                      data={mockChartData.locOverTime}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4B5563" />
-                      <XAxis dataKey="month" tick={{ fill: '#9CA3AF' }} />
-                      <YAxis tick={{ fill: '#9CA3AF' }} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#4B5563', color: '#F9FAFB' }}
-                      />
-                      <Legend wrapperStyle={{ color: '#9CA3AF' }} />
-                      <Bar dataKey="added" name="LOC Added" fill="#4ADE80" />
-                      <Bar dataKey="removed" name="LOC Removed" fill="#F87171" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-              
-              <div className="bg-gray-700 rounded-lg p-4">
-                <h3 className="text-lg font-semibold mb-4 text-gray-300">PRs & Issues</h3>
-                <div className="h-64">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart
-                      data={mockChartData.prIssueData}
-                      margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                    >
-                      <CartesianGrid strokeDasharray="3 3" stroke="#4B5563" />
-                      <XAxis dataKey="month" tick={{ fill: '#9CA3AF' }} />
-                      <YAxis tick={{ fill: '#9CA3AF' }} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: '#1F2937', borderColor: '#4B5563', color: '#F9FAFB' }}
-                      />
-                      <Legend wrapperStyle={{ color: '#9CA3AF' }} />
-                      <Line type="monotone" dataKey="prs" name="Pull Requests" stroke="#A78BFA" strokeWidth={2} />
-                      <Line type="monotone" dataKey="issues" name="Issues" stroke="#38BDF8" strokeWidth={2} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            </div>
-            
             <div className="mt-6 bg-gray-700 rounded-lg p-4">
               <h3 className="text-lg font-semibold mb-4 text-gray-300">Contribution Heatmap</h3>
               <div className="py-4">
@@ -451,7 +395,7 @@ export default function GitHubDashboard() {
           </div>
           
           {/* Export/Share Buttons - Full width */}
-          <div className="lg:col-span-12 flex flex-col sm:flex-row justify-center gap-4 mt-2">
+          {/* <div className="lg:col-span-12 flex flex-col sm:flex-row justify-center gap-4 mt-2">
             <button className="flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-md transition-colors">
               <Download size={18} className="mr-2" />
               Download as Portfolio (PDF)
@@ -460,7 +404,7 @@ export default function GitHubDashboard() {
               <Share2 size={18} className="mr-2" />
               Share Profile
             </button>
-          </div>
+          </div> */}
         </div>
         
         <footer className="mt-12 text-center text-gray-500 text-sm">
