@@ -1,6 +1,5 @@
 import { Octokit } from "octokit";
 import dotenv from "dotenv";
-import Repository from "../models/Repository.js";
 import fetch from "node-fetch";
 
 dotenv.config();
@@ -35,35 +34,6 @@ export async function getUserRepositories(req, res) {
     }
 
     const repositories = await response.json(); 
-
-    for (const repo of repositories) {
-      const existingRepo = await Repository.findOne({ id: repo.id });
-
-      if (!existingRepo) {
-        const newRepo = new Repository({
-          id: repo.id,
-          name: repo.name,
-          full_name: repo.full_name,
-          owner: repo.owner.login,
-          private: repo.private,
-          html_url: repo.html_url,
-          description: repo.description || null,
-          fork: repo.fork,
-          url: repo.url,
-          created_at: repo.created_at,
-          updated_at: repo.updated_at,
-          pushed_at: repo.pushed_at,
-          language: repo.language || null,
-          forks_count: repo.forks_count,
-          stargazers_count: repo.stargazers_count,
-          watchers_count: repo.watchers_count,
-          open_issues_count: repo.open_issues_count,
-          visibility: repo.visibility,
-        });
-
-        await newRepo.save();
-      }
-    }
     return res.status(200).json(repositories);
   } catch (err) {
     console.error("Error fetching repositories:", err);

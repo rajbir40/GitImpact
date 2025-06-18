@@ -1,17 +1,55 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
-import {BarChart,Bar,XAxis,YAxis,CartesianGrid,Tooltip,Legend,ResponsiveContainer,RadarChart,PolarGrid,PolarAngleAxis,PolarRadiusAxis,Radar,LineChart,Line,
-  PieChart,Pie,Cell,AreaChart,Area,
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  PolarRadiusAxis,
+  Radar,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
 } from "recharts";
-import {Github,Star,BookOpen,Users,Calendar,MapPin,Briefcase,Code,GitPullRequest,Bug,Award,Download,Share2,GitFork,Eye,Activity,Zap,TrendingUp,Clock,Database,
+import {
+  Github,
+  Star,
+  BookOpen,
+  Users,
+  Calendar,
+  MapPin,
+  Briefcase,
+  Code,
+  GitPullRequest,
+  Bug,
+  Award,
+  Download,
+  Share2,
+  GitFork,
+  Eye,
+  Activity,
+  Zap,
+  TrendingUp,
+  Clock,
+  Database,
 } from "lucide-react";
-import { Info  } from "lucide-react";
-
+import { Info } from "lucide-react";
+const url = import.meta.env.VITE_BACKEND_URL;
 
 export default function GitHubDashboard() {
-
-  const {username} = useParams();
+  const { username } = useParams();
 
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState(null);
@@ -38,24 +76,22 @@ export default function GitHubDashboard() {
   const [radarData, setRadarData] = useState([]);
 
   const [showImpactTooltip, setShowImpactTooltip] = useState(false);
-  const [repoFilter, setRepoFilter] = useState('all');
-  const [repoSort, setRepoSort] = useState('stars');
+  const [repoFilter, setRepoFilter] = useState("all");
+  const [repoSort, setRepoSort] = useState("stars");
 
   const [impactScore, setImpactScore] = useState(0);
 
   const [loadingSteps, setLoadingSteps] = useState([
     { label: "Fetching User Profile", done: false },
     { label: "Fetching Repository Data", done: false },
-    { label: "Calculating LOC", done: false },
+    { label: "Analyzing Repositories", done: false },
     { label: "Analyzing Pull Requests", done: false },
     { label: "Calculating Impact Score", done: false },
   ]);
 
   const markStepDone = (index) => {
     setLoadingSteps((prevSteps) =>
-      prevSteps.map((step, i) =>
-        i === index ? { ...step, done: true } : step
-      )
+      prevSteps.map((step, i) => (i === index ? { ...step, done: true } : step))
     );
   };
 
@@ -94,7 +130,18 @@ export default function GitHubDashboard() {
 
   function generateMonthlyPRActivity(prs) {
     const MONTHS = [
-      "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     const now = new Date();
     const monthBuckets = Array.from({ length: 6 }).map((_, i) => {
@@ -102,7 +149,7 @@ export default function GitHubDashboard() {
       return {
         key: `${d.getFullYear()}-${d.getMonth()}`,
         month: MONTHS[d.getMonth()],
-        prs: 0
+        prs: 0,
       };
     });
 
@@ -118,7 +165,18 @@ export default function GitHubDashboard() {
 
   function generateMonthlyCommitActivity(commitsList) {
     const MONTHS = [
-      "Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec",
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ];
     const now = new Date();
     const monthBuckets = Array.from({ length: 6 }).map((_, i) => {
@@ -126,7 +184,7 @@ export default function GitHubDashboard() {
       return {
         key: `${d.getFullYear()}-${d.getMonth()}`,
         month: MONTHS[d.getMonth()],
-        commits: 0
+        commits: 0,
       };
     });
 
@@ -144,21 +202,36 @@ export default function GitHubDashboard() {
     return prAct.map((b, i) => ({
       month: b.month,
       prs: b.prs,
-      commits: commitAct[i]?.commits || 0
+      commits: commitAct[i]?.commits || 0,
     }));
   }
 
-  function calculateImpactScore(loc, commits, PRs) {
-    const locScore = Math.min(100, loc / 100);
-    const commitScore = Math.min(100, commits );
-    const prScore   = Math.min(100, PRs * 2);
-    const total     = Math.floor((locScore + commitScore + prScore) / 3);
+  function calculateImpactScore(
+    loc,
+    commitCount,
+    totalPRs,
+    mergedCount,
+    totalStars,
+    totalForks
+  ) {
+    const codeContributionScore = Math.min(100, loc / 100);
+    const commitScore = Math.min(100, commitCount / 2);
+    const prSuccessRate = totalPRs > 0 ? (mergedCount / totalPRs) * 100 : 0;
+    const starForkScore = Math.min(100, (totalStars + totalForks) / 10);
+
+    const total = Math.floor(
+      0.211 * starForkScore +
+        0.40 * codeContributionScore +
+        0.222 * prSuccessRate +
+        0.167 * commitScore
+    );
+
     setImpactScore(total);
-    console.log(total);
+    console.log("Impact Score:", total);
   }
 
   async function fetchUserData() {
-    const res = await fetch(`http://localhost:3000/api/user/fetch/${username}`);
+    const res = await fetch(`${url}/user/fetch/${username}`);
     const u = await res.json();
     return {
       username: u.login,
@@ -176,17 +249,28 @@ export default function GitHubDashboard() {
   }
 
   async function fetchRepoData() {
-    const res = await fetch(`http://localhost:3000/api/repo/fetch/${username}`);
+    const res = await fetch(`${url}/repo/fetch/${username}`);
     const repos = await res.json();
-    const totalStars   = repos.reduce((sum, r) => sum + (r.stargazers_count || 0), 0);
-    const totalWatchers = repos.reduce((sum, r) => sum + (r.watchers_count   || 0), 0);
-    const forks        = repos.filter((r) => r.fork).length;
-    const originals    = repos.length - forks;
-    return { totalStars, totalWatchers, totalForks: forks, originalCount: originals };
+    const totalStars = repos.reduce(
+      (sum, r) => sum + (r.stargazers_count || 0),
+      0
+    );
+    const totalWatchers = repos.reduce(
+      (sum, r) => sum + (r.watchers_count || 0),
+      0
+    );
+    const forks = repos.filter((r) => r.fork).length;
+    const originals = repos.length - forks;
+    return {
+      totalStars,
+      totalWatchers,
+      totalForks: forks,
+      originalCount: originals,
+    };
   }
 
   async function fetchTotalLOC() {
-    const res  = await fetch(`http://localhost:3000/api/contri/fetchloc/${username}`);
+    const res = await fetch(`${url}/contri/fetchloc/${username}`);
     const body = await res.json();
     // body: { totalLoc, deleteLOC, totalCommits, repoStats, activity }
     return {
@@ -199,7 +283,7 @@ export default function GitHubDashboard() {
   }
 
   async function fetchPullRequestData() {
-    const res = await fetch(`http://localhost:3000/api/pr/fetch/${username}`);
+    const res = await fetch(`${url}/pr/fetch/${username}`);
     const prs = await res.json();
     return {
       totalPRs: prs.length,
@@ -208,28 +292,34 @@ export default function GitHubDashboard() {
     };
   }
 
-  function generateRadarData({ commits, totalPRs, stars, forkedRepo, issues = 0 }) {
-  return [
-    { subject: "Commits", A: Math.min(100, commits), fullMark: 100 },
-    { subject: "PRs", A: Math.min(100, totalPRs * 2), fullMark: 100 },
-    { subject: "Issues", A: Math.min(100, issues * 5), fullMark: 100 },
-    { subject: "Stars", A: Math.min(100, stars), fullMark: 100 },
-    { subject: "Forks", A: Math.min(100, forkedRepo*2), fullMark: 100 },
-  ];
-}
+  function generateRadarData({
+    commits,
+    totalPRs,
+    stars,
+    forkedRepo,
+    issues = 0,
+  }) {
+    return [
+      { subject: "Commits", A: Math.min(100, commits), fullMark: 100 },
+      { subject: "PRs", A: Math.min(100, totalPRs * 2), fullMark: 100 },
+      { subject: "Issues", A: Math.min(100, issues * 5), fullMark: 100 },
+      { subject: "Stars", A: Math.min(100, stars), fullMark: 100 },
+      { subject: "Forks", A: Math.min(100, forkedRepo * 2), fullMark: 100 },
+    ];
+  }
 
   const getImpactScoreColor = (score) => {
-    if (score >= 80) return 'from-green-500 to-emerald-600';
-    if (score >= 60) return 'from-blue-500 to-purple-600';
-    if (score >= 40) return 'from-yellow-500 to-orange-600';
-    return 'from-red-500 to-pink-600';
+    if (score >= 70) return "from-green-500 to-emerald-600";
+    if (score >= 50) return "from-blue-500 to-purple-600";
+    if (score >= 30) return "from-yellow-500 to-orange-600";
+    return "from-red-500 to-pink-600";
   };
 
   const getImpactScoreDescription = (score) => {
-    if (score >= 80) return 'Exceptional Impact';
-    if (score >= 60) return 'Strong Impact';
-    if (score >= 40) return 'Moderate Impact';
-    return 'Growing Impact';
+    if (score >= 80) return "Exceptional Impact";
+    if (score >= 60) return "Strong Impact";
+    if (score >= 40) return "Moderate Impact";
+    return "Growing Impact";
   };
 
   useEffect(() => {
@@ -260,35 +350,52 @@ export default function GitHubDashboard() {
         setCommitActivity(monthlyCommitActivity);
 
         setTopOriginalRepos(
-          repoStats.filter((r) => !r.fork).sort((a, b) => b.loc - a.loc).slice(0, 3)
+          repoStats
+            .filter((r) => !r.fork)
+            .sort((a, b) => b.loc - a.loc)
+            .slice(0, 3)
         );
         setTopForkedRepos(
-          repoStats.filter((r) => r.fork).sort((a, b) => b.loc - a.loc).slice(0, 3)
+          repoStats
+            .filter((r) => r.fork)
+            .sort((a, b) => b.loc - a.loc)
+            .slice(0, 3)
         );
         setTopLanguages(generateLanguageData(repoStats));
         markStepDone(2);
 
-        const { totalPRs: prCount, mergedCount, monthlyPRActivity } =
-          await fetchPullRequestData();
+        const {
+          totalPRs: prCount,
+          mergedCount,
+          monthlyPRActivity,
+        } = await fetchPullRequestData();
         setTotalPRs(prCount);
         setPrsMerged(mergedCount);
         setPrActivity(monthlyPRActivity);
         markStepDone(3);
 
-        setActivityData(generateActivityData(monthlyPRActivity, monthlyCommitActivity));
+        setActivityData(
+          generateActivityData(monthlyPRActivity, monthlyCommitActivity)
+        );
 
-        calculateImpactScore(loc,commits,prCount);
+        calculateImpactScore(
+          loc,
+          commitCount,
+          totalPRs,
+          mergedCount,
+          totalStars,
+          totalForks
+        );
         markStepDone(4);
 
         const radar = generateRadarData({
-        commits: commitCount,
-        totalPRs: prCount,
-        stars: totalStars,
-        forkedRepo: totalForks,
-        issues: 0, 
-      });
-      setRadarData(radar);
-
+          commits: commitCount,
+          totalPRs: prCount,
+          stars: totalStars,
+          forkedRepo: totalForks,
+          issues: 0,
+        });
+        setRadarData(radar);
       } catch (err) {
         console.error("Dashboard load error:", err);
       } finally {
@@ -300,37 +407,36 @@ export default function GitHubDashboard() {
   }, []);
 
   function timeAgo(dateString) {
-  const now = new Date();
-  const past = new Date(dateString);
-  const diffInSeconds = Math.floor((now - past) / 1000);
+    const now = new Date();
+    const past = new Date(dateString);
+    const diffInSeconds = Math.floor((now - past) / 1000);
 
-  const units = [
-    { name: 'year', seconds: 31536000 },
-    { name: 'month', seconds: 2592000 },
-    { name: 'week', seconds: 604800 },
-    { name: 'day', seconds: 86400 },
-    { name: 'hour', seconds: 3600 },
-    { name: 'minute', seconds: 60 },
-    { name: 'second', seconds: 1 }
-  ];
+    const units = [
+      { name: "year", seconds: 31536000 },
+      { name: "month", seconds: 2592000 },
+      { name: "week", seconds: 604800 },
+      { name: "day", seconds: 86400 },
+      { name: "hour", seconds: 3600 },
+      { name: "minute", seconds: 60 },
+      { name: "second", seconds: 1 },
+    ];
 
-  for (const unit of units) {
-    const interval = Math.floor(diffInSeconds / unit.seconds);
-    if (interval >= 1) {
-      return `${interval} ${unit.name}${interval !== 1 ? 's' : ''} ago`;
+    for (const unit of units) {
+      const interval = Math.floor(diffInSeconds / unit.seconds);
+      if (interval >= 1) {
+        return `${interval} ${unit.name}${interval !== 1 ? "s" : ""} ago`;
+      }
     }
-  }
 
-  return 'just now';
-}
+    return "just now";
+  }
 
   function formatNumber(num) {
-    if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, '') + 'B';
-    if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, '') + 'M';
-    if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, '') + 'k';
+    if (num >= 1e9) return (num / 1e9).toFixed(1).replace(/\.0$/, "") + "B";
+    if (num >= 1e6) return (num / 1e6).toFixed(1).replace(/\.0$/, "") + "M";
+    if (num >= 1e3) return (num / 1e3).toFixed(1).replace(/\.0$/, "") + "k";
     return num.toString();
   }
-
 
   if (loading) {
     return (
@@ -354,11 +460,11 @@ export default function GitHubDashboard() {
                 <span className="text-2xl transition-all duration-300">
                   {step.done ? "✅" : "⏳"}
                 </span>
-                <span className={`transition-all duration-300 ${
-                  step.done 
-                    ? "text-green-400 font-medium" 
-                    : "text-gray-300"
-                }`}>
+                <span
+                  className={`transition-all duration-300 ${
+                    step.done ? "text-green-400 font-medium" : "text-gray-300"
+                  }`}
+                >
                   {step.label}
                 </span>
                 {step.done && (
@@ -396,7 +502,7 @@ export default function GitHubDashboard() {
                 />
                 <div className="absolute -bottom-2 -right-2 w-6 h-6 bg-green-500 rounded-full border-2 border-gray-800"></div>
               </div>
-              
+
               <div className="text-center md:text-left mb-4">
                 <h2 className="text-xl font-bold mb-1">{userData.name}</h2>
                 <div className="flex items-center justify-center md:justify-start text-gray-400 mb-2">
@@ -463,19 +569,27 @@ export default function GitHubDashboard() {
 
             <div className="grid grid-cols-2 gap-4 mb-6">
               <div className="bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl p-4 text-white transform hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl md:text-3xl font-bold">{userData.publicRepos}</div>
+                <div className="text-2xl md:text-3xl font-bold">
+                  {userData.publicRepos}
+                </div>
                 <div className="text-blue-100 text-sm">Total Repositories</div>
               </div>
               <div className="bg-gradient-to-br from-yellow-500 to-yellow-600 rounded-xl p-4 text-white transform hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl md:text-3xl font-bold">{stars.toLocaleString()}</div>
+                <div className="text-2xl md:text-3xl font-bold">
+                  {stars.toLocaleString()}
+                </div>
                 <div className="text-yellow-100 text-sm">Total Stars</div>
               </div>
               <div className="bg-gradient-to-br from-purple-600 to-purple-700 rounded-xl p-4 text-white transform hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl md:text-3xl font-bold">{forkedRepo}</div>
+                <div className="text-2xl md:text-3xl font-bold">
+                  {forkedRepo}
+                </div>
                 <div className="text-purple-100 text-sm">Total Forks</div>
               </div>
               <div className="bg-gradient-to-br from-green-600 to-green-700 rounded-xl p-4 text-white transform hover:scale-105 transition-transform duration-300">
-                <div className="text-2xl md:text-3xl font-bold">{originalRepos}</div>
+                <div className="text-2xl md:text-3xl font-bold">
+                  {originalRepos}
+                </div>
                 <div className="text-green-100 text-sm">Original Repos</div>
               </div>
             </div>
@@ -499,35 +613,49 @@ export default function GitHubDashboard() {
           {/* Enhanced Impact Summary with Tooltip */}
           <div className="lg:col-span-4 bg-gray-800/50 backdrop-blur-sm rounded-2xl shadow-2xl p-6 border border-gray-700">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-blue-400 flex items-center">
-                <Zap size={20} className="mr-2" />
-                Impact Score
-                <div className="relative ml-2">
-  <button
-    onMouseEnter={() => setShowImpactTooltip(true)}
-    onMouseLeave={() => setShowImpactTooltip(false)}
-    className="text-gray-400 hover:text-blue-400 transition-colors"
-  >
-    <Info size={16} />
-  </button>
-  {showImpactTooltip && (
-    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl border border-gray-600 z-10">
-      <div className="font-semibold mb-1">Impact Score Calculation:</div>
-      <div className="text-gray-300">
-        • Stars & Forks (30%)<br/>
-        • Code Contributions (25%)<br/>
-        • PR Success Rate (20%)<br/>
-        • Community Engagement (15%)<br/>
-        • Consistency (10%)
-      </div>
-      <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
-    </div>
-  )}
-</div>
-              </h2>
+              <div className="flex flex-col">
+                <h2 className="text-xl font-bold text-blue-400 flex items-center">
+                  <Zap size={20} className="mr-2" />
+                  Impact Score
+                  <div className="relative ml-2">
+                    <button
+                      onMouseEnter={() => setShowImpactTooltip(true)}
+                      onMouseLeave={() => setShowImpactTooltip(false)}
+                      className="text-gray-400 hover:text-blue-400 transition-colors"
+                    >
+                      <Info size={16} />
+                    </button>
+                    {showImpactTooltip && (
+                      <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl border border-gray-600 z-10">
+                        <div className="font-semibold mb-1">
+                          Impact Score Calculation:
+                        </div>
+                        <div className="text-gray-300">
+                          • Stars & Forks (21.1%)
+                          <br />
+                          • Code Contributions (40%)
+                          <br />
+                          • PR Success Rate (22.2%)
+                          <br />• Commits (16.7%)
+                        </div>
+
+                        <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
+                      </div>
+                    )}
+                  </div>
+                </h2>
+                <div className="text-xs text-gray-400 mt-1 flex items-center">
+                  <Calendar size={12} className="mr-1" />
+                  Last 6 months
+                </div>
+              </div>
               <div className="text-center">
-                <div className={`bg-gradient-to-br ${getImpactScoreColor(impactScore)} text-white text-2xl md:text-3xl font-bold w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300`}>
-                  {impactScore}
+                <div
+                  className={`bg-gradient-to-br ${getImpactScoreColor(
+                    impactScore
+                  )} text-white text-2xl md:text-3xl font-bold w-16 h-16 md:w-20 md:h-20 rounded-full flex items-center justify-center shadow-2xl transform hover:scale-110 transition-transform duration-300`}
+                >
+                  {impactScore ?? 0}
                 </div>
                 <div className="text-xs text-gray-400 mt-1">
                   {getImpactScoreDescription(impactScore)}
@@ -559,7 +687,9 @@ export default function GitHubDashboard() {
                   <Github size={14} className="mr-2 text-blue-400" />
                   <span className="text-sm">Commits</span>
                 </div>
-                <div className="text-lg font-bold text-blue-400">{commits.toLocaleString()}</div>
+                <div className="text-lg font-bold text-blue-400">
+                  {commits.toLocaleString()}
+                </div>
               </div>
               <div className="bg-gray-700/50 rounded-xl p-3 border border-gray-600">
                 <div className="flex items-center text-gray-300 mb-1">
@@ -567,7 +697,7 @@ export default function GitHubDashboard() {
                   <span className="text-sm">PRs Merged</span>
                 </div>
                 <div className="text-lg font-bold text-purple-400">
-                  {Math.round((prsMerged/totalPRs)*100)}%
+                  {Math.round((prsMerged / totalPRs) * 100)}%
                 </div>
               </div>
             </div>
@@ -601,7 +731,7 @@ export default function GitHubDashboard() {
                         backgroundColor: "#1F2937",
                         borderColor: "#4B5563",
                         color: "#F9FAFB",
-                        borderRadius: "12px"
+                        borderRadius: "12px",
                       }}
                       formatter={(value, name) => [`${value}%`, name]}
                     />
@@ -625,7 +755,9 @@ export default function GitHubDashboard() {
                       </span>
                     </div>
                     <div className="text-right">
-                      <div className="text-white font-bold text-sm">{lang.value}%</div>
+                      <div className="text-white font-bold text-sm">
+                        {lang.value}%
+                      </div>
                       <div className="text-gray-400 text-xs">
                         {lang.loc.toLocaleString()} LOC
                       </div>
@@ -645,7 +777,10 @@ export default function GitHubDashboard() {
 
             <div className="h-48 md:h-64">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart outerRadius={window.innerWidth < 768 ? 60 : 90} data={radarData}>
+                <RadarChart
+                  outerRadius={window.innerWidth < 768 ? 60 : 90}
+                  data={radarData}
+                >
                   <PolarGrid stroke="#4B5563" />
                   <PolarAngleAxis
                     dataKey="subject"
@@ -669,9 +804,9 @@ export default function GitHubDashboard() {
                       backgroundColor: "#1F2937",
                       borderColor: "#4B5563",
                       color: "#F9FAFB",
-                      borderRadius: "12px"
+                      borderRadius: "12px",
                     }}
-                    formatter={(value) => [`${value}/100`, 'Score']}
+                    formatter={(value) => [`${value}/100`, "Score"]}
                   />
                 </RadarChart>
               </ResponsiveContainer>
@@ -696,7 +831,7 @@ export default function GitHubDashboard() {
                       backgroundColor: "#1F2937",
                       borderColor: "#4B5563",
                       color: "#F9FAFB",
-                      borderRadius: "12px"
+                      borderRadius: "12px",
                     }}
                   />
                   <Legend wrapperStyle={{ color: "#9CA3AF" }} />
@@ -733,67 +868,82 @@ export default function GitHubDashboard() {
             </div>
 
             <div className="space-y-4">
-              {topOriginalRepos.map((repo, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-700/50 rounded-xl p-4 border border-gray-600 hover:border-blue-500/50 transition-all duration-300 hover:transform hover:scale-[1.02]"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white mb-1 flex items-center">
-                        {repo.name}
+              {topOriginalRepos && topOriginalRepos.length > 0 ? (
+                topOriginalRepos.map((repo, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-700/50 rounded-xl p-4 border border-gray-600 hover:border-blue-500/50 transition-all duration-300 hover:transform hover:scale-[1.02]"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-white mb-1 flex items-center">
+                          {repo.name}
+                          <a
+                            href={repo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 text-gray-400 hover:text-blue-400 transition-colors"
+                          ></a>
+                        </h3>
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          {repo.description}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end space-y-1 ml-4">
+                        <div className="flex items-center text-sm">
+                          <Star size={14} className="text-yellow-400 mr-1" />
+                          <span className="text-gray-300 font-medium">
+                            {repo.stars.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <GitFork size={14} className="text-gray-400 mr-1" />
+                          <span className="text-gray-300">{repo.forks}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                      <div className="flex items-center space-x-4 text-xs mb-2 md:mb-0">
+                        <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1 rounded-full shadow-sm">
+                          {repo.language}
+                        </span>
+                        <span className="text-gray-400 flex items-center">
+                          <Clock size={12} className="mr-1" />
+                          {timeAgo(repo.pushedAt)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3 text-xs">
+                        <span className="text-green-400 font-medium">
+                          {repo.loc.toLocaleString()} LOC
+                        </span>
+                        <span className="text-purple-400 font-medium">
+                          {repo.commitCount} commits
+                        </span>
                         <a
                           href={repo.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-2 text-gray-400 hover:text-blue-400 transition-colors"
+                          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 flex items-center"
                         >
+                          <Github size={12} className="mr-1" />
+                          View
                         </a>
-                      </h3>
-                      <p className="text-gray-300 text-sm leading-relaxed">
-                        {repo.description}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1 ml-4">
-                      <div className="flex items-center text-sm">
-                        <Star size={14} className="text-yellow-400 mr-1" />
-                        <span className="text-gray-300 font-medium">{repo.stars.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <GitFork size={14} className="text-gray-400 mr-1" />
-                        <span className="text-gray-300">{repo.forks}</span>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex flex-col md:flex-row md:items-center justify-between">
-                    <div className="flex items-center space-x-4 text-xs mb-2 md:mb-0">
-                      <span className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-3 py-1 rounded-full shadow-sm">
-                        {repo.language}
-                      </span>
-                      <span className="text-gray-400 flex items-center">
-                        <Clock size={12} className="mr-1" />
-                        {timeAgo(repo.pushedAt)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-xs">
-                      <span className="text-green-400 font-medium">{repo.loc.toLocaleString()} LOC</span>
-                      <span className="text-purple-400 font-medium">
-                        {repo.commitCount} commits
-                      </span>
-                      <a
-                        href={repo.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 flex items-center"
-                      >
-                        <Github size={12} className="mr-1" />
-                        View
-                      </a>
-                    </div>
-                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <BookOpen size={48} className="text-gray-500 mb-4" />
+                  <p className="text-gray-400 text-lg font-medium mb-2">
+                    No Personal Repositories
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    No original repositories found to display.
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
@@ -805,70 +955,85 @@ export default function GitHubDashboard() {
             </h2>
 
             <div className="space-y-4">
-              {topForkedRepos.map((repo, index) => (
-                <div
-                  key={index}
-                  className="bg-gray-700/50 rounded-xl p-4 border border-gray-600 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-[1.02]"
-                >
-                  <div className="flex justify-between items-start mb-3">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-white mb-1 flex items-center">
-                        {repo.name}
+              {topForkedRepos && topForkedRepos.length > 0 ? (
+                topForkedRepos.map((repo, index) => (
+                  <div
+                    key={index}
+                    className="bg-gray-700/50 rounded-xl p-4 border border-gray-600 hover:border-purple-500/50 transition-all duration-300 hover:transform hover:scale-[1.02]"
+                  >
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-white mb-1 flex items-center">
+                          {repo.name}
+                          <a
+                            href={repo.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="ml-2 text-gray-400 hover:text-purple-400 transition-colors"
+                          ></a>
+                        </h3>
+                        <p className="text-sm text-gray-400 mb-2">
+                          forked from {repo.originalOwner}
+                        </p>
+                        <p className="text-gray-300 text-sm leading-relaxed">
+                          {repo.description}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end space-y-1 ml-4">
+                        <div className="flex items-center text-sm">
+                          <Star size={14} className="text-yellow-400 mr-1" />
+                          <span className="text-gray-300 font-medium">
+                            {repo.stars.toLocaleString()}
+                          </span>
+                        </div>
+                        <div className="flex items-center text-sm">
+                          <GitFork size={14} className="text-gray-400 mr-1" />
+                          <span className="text-gray-300">{repo.forks}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col md:flex-row md:items-center justify-between">
+                      <div className="flex items-center space-x-4 text-xs mb-2 md:mb-0">
+                        <span className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-3 py-1 rounded-full shadow-sm">
+                          {repo.language}
+                        </span>
+                        <span className="text-gray-400 flex items-center">
+                          <Clock size={12} className="mr-1" />
+                          {timeAgo(repo.pushedAt)}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-3 text-xs">
+                        <span className="text-orange-400 font-medium">
+                          {repo.loc.toLocaleString()} LOC
+                        </span>
+                        <span className="text-blue-400 font-medium">
+                          {repo.commitCount} commits
+                        </span>
                         <a
                           href={repo.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="ml-2 text-gray-400 hover:text-purple-400 transition-colors"
+                          className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 flex items-center"
                         >
+                          <Github size={12} className="mr-1" />
+                          View
                         </a>
-                      </h3>
-                      <p className="text-sm text-gray-400 mb-2">
-                        forked from {repo.originalOwner}
-                      </p>
-                      <p className="text-gray-300 text-sm leading-relaxed">
-                        {repo.description}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end space-y-1 ml-4">
-                      <div className="flex items-center text-sm">
-                        <Star size={14} className="text-yellow-400 mr-1" />
-                        <span className="text-gray-300 font-medium">{repo.stars.toLocaleString()}</span>
-                      </div>
-                      <div className="flex items-center text-sm">
-                        <GitFork size={14} className="text-gray-400 mr-1" />
-                        <span className="text-gray-300">{repo.forks}</span>
                       </div>
                     </div>
                   </div>
-
-                  <div className="flex flex-col md:flex-row md:items-center justify-between">
-                    <div className="flex items-center space-x-4 text-xs mb-2 md:mb-0">
-                      <span className="bg-gradient-to-r from-purple-600 to-purple-700 text-white px-3 py-1 rounded-full shadow-sm">
-                        {repo.language}
-                      </span>
-                      <span className="text-gray-400 flex items-center">
-                        <Clock size={12} className="mr-1" />
-                        {timeAgo(repo.pushedAt)}
-                      </span>
-                    </div>
-                    <div className="flex items-center space-x-3 text-xs">
-                      <span className="text-orange-400 font-medium">{repo.loc.toLocaleString()} LOC</span>
-                      <span className="text-blue-400 font-medium">
-                        {repo.commitCount} commits
-                      </span>
-                      <a
-                        href={repo.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white px-3 py-1 rounded-lg text-xs font-medium transition-all duration-300 shadow-sm hover:shadow-md transform hover:-translate-y-0.5 flex items-center"
-                      >
-                        <Github size={12} className="mr-1" />
-                        View
-                      </a>
-                    </div>
-                  </div>
+                ))
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12 text-center">
+                  <GitFork size={48} className="text-gray-500 mb-4" />
+                  <p className="text-gray-400 text-lg font-medium mb-2">
+                    No Forked Repositories
+                  </p>
+                  <p className="text-gray-500 text-sm">
+                    No forked repositories found to display.
+                  </p>
                 </div>
-              ))}
+              )}
             </div>
           </div>
         </div>

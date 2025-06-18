@@ -45,15 +45,24 @@ export async function fetchTotalLoc(req, res) {
     let totalCommits = 0;
     let activity = [];
     let repoStats = [];
-    const personalRepos = repositories
-      .filter((repo) => repo.fork === false)
-      .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
-      // .slice(0, 5);
 
-    const forkedRepos = repositories
-      .filter((repo) => repo.fork === true)
-      .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
-      // .slice(0, 5);
+    const now = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
+
+    const personalRepos = repositories
+    .filter((repo) => 
+      !repo.fork && new Date(repo.pushed_at) >= sixMonthsAgo
+    )
+    .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
+    // .slice(0, 50);
+
+  const forkedRepos = repositories
+    .filter((repo) => 
+      repo.fork && new Date(repo.pushed_at) >= sixMonthsAgo
+    )
+    .sort((a, b) => new Date(b.pushed_at) - new Date(a.pushed_at))
+    // .slice(0, 50);
 
     const parent = await fetchReposWithParentInfo(forkedRepos);
 
