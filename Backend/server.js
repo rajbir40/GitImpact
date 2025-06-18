@@ -11,6 +11,7 @@ import repoRoutes from "./Routes/repoRoutes.js";
 import contributionRoutes from "./Routes/contributionRoutes.js";
 import userRoutes from "./Routes/userRoutes.js";
 import prRoutes from "./Routes/prRoutes.js";
+import serverless from "serverless-http";
 
 // Load environment variables
 dotenv.config();
@@ -73,5 +74,4 @@ const PORT = process.env.PORT || 3000;
 //   console.log(`Server is running on port ${PORT}`);
 // });
 
-import serverless from "serverless-http";
-module.exports = serverless(app);
+export const handler = serverless(app);
