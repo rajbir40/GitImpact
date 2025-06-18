@@ -5,8 +5,6 @@ import fetch from "node-fetch";
 
 dotenv.config();
 const GITHUB_ACCESS_TOKEN = process.env.GITHUB_ACCESS_TOKEN;
-const OWNER = "rajbir40";
-const REPO = "GitImpact";
 
 
 export async function getUserRepositories(req, res) {
@@ -36,7 +34,7 @@ export async function getUserRepositories(req, res) {
       throw new Error(`GitHub API error: ${response.statusText}`);
     }
 
-    const repositories = await response.json(); // ✅ Fix: Use .json() here
+    const repositories = await response.json(); 
 
     for (const repo of repositories) {
       const existingRepo = await Repository.findOne({ id: repo.id });
@@ -66,7 +64,6 @@ export async function getUserRepositories(req, res) {
         await newRepo.save();
       }
     }
-
     return res.status(200).json(repositories);
   } catch (err) {
     console.error("Error fetching repositories:", err);
@@ -120,6 +117,8 @@ async function fetchCommitDetails(owner, repo, sha) {
 
   const data = await response.json();
   let userLOC = 0;
+  let deleteLOC = 0;
+  let date = data.commit.author.date;
 
   if (data.files) {
     data.files.forEach((file) => {
@@ -131,31 +130,66 @@ async function fetchCommitDetails(owner, repo, sha) {
         "node_modules/",
       ];
       if (!ignoredFiles.some((ignore) => file.filename.includes(ignore))) {
-        userLOC += file.additions; // Count only meaningful LOC
+        userLOC += file.additions; 
+        deleteLOC += file.deletions;
       }
     });
   }
 
-  return userLOC;
+  return { userLOC, deleteLOC ,date};
 }
 
-export async function calculateTotalUserLOC(owner,repo,username) {
+export async function calculateTotalUserLOC(owner, repo, username) {
   console.log("Fetching commits...");
-  const commitShas = await fetchAllCommits(owner,repo,username);
-
-  // return res.status(200).json({commitShas});
+  const commitShas = await fetchAllCommits(owner, repo, username);
 
   let totalLOC = 0;
+  let totalDeletedLOC = 0;
+  let commitCount = commitShas.length;
 
-  for (const sha of commitShas) {
-    console.log(`Processing commit: ${sha}`);
-    const loc = await fetchCommitDetails(owner, repo, sha);
-    totalLOC += loc;
+  const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const now = new Date();
+  const monthlyCommitsMap = new Map();
+
+  for (let i = 5; i >= 0; i--) {
+    const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    const key = `${date.getFullYear()}-${date.getMonth()}`; // e.g., "2025-5"
+    monthlyCommitsMap.set(key, {
+      month: MONTH_NAMES[date.getMonth()],
+      commits: 0
+    });
   }
 
+  // Process each commit
+  for (const sha of commitShas) {
+    console.log(`Processing commit: ${sha}`);
+    let { userLOC, deleteLOC, date } = await fetchCommitDetails(owner, repo, sha);
+
+    totalLOC += userLOC ?? 0;
+    totalDeletedLOC += deleteLOC ?? 0;
+
+    const commitDate = new Date(date);
+    const key = `${commitDate.getFullYear()}-${commitDate.getMonth()}`;
+    if (monthlyCommitsMap.has(key)) {
+      monthlyCommitsMap.get(key).commits += 1;
+    }
+  }
+
+  const monthlyCommitActivity = Array.from(monthlyCommitsMap.values());
+
   console.log(`\nTotal LOC written by the user: ${totalLOC}`);
-  return totalLOC;
+  console.log(`Total LOC deleted by the user: ${totalDeletedLOC}`);
+  console.log("Monthly Commit Activity:", monthlyCommitActivity);
+
+  return {
+    loc: totalLOC,
+    deleteLoc: totalDeletedLOC,
+    commitCount: commitCount,
+    monthlyCommitActivity 
+  };
 }
+
+
 
 export async function getPullRequestsInRepo(req, res) {
   try {
@@ -257,6 +291,8 @@ export async function fetchReposWithParentInfo() {
 
 export async function fetchCommitInfo(req, res) {
     const sha = req.params.sha;
+    const OWNER = "opencodeiiita";
+    const REPO = "SponsoHive-Backend";
   try {
     const url = `https://api.github.com/repos/${OWNER}/${REPO}/commits/${sha}`;
 

@@ -6,7 +6,7 @@ import {
 
 const router = express.Router();
 
-router.get("/fetchloc/:userid", fetchTotalLoc);
+router.get("/fetchloc/:username", fetchTotalLoc);
 router.get("/fetch/commit", fetchAllCommits);
 
 export default router;

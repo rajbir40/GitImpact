@@ -3,6 +3,7 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import {connectDB} from "./config/db.js";
 import cookieParser from "cookie-parser";
+import cors from "cors";
 import http from "http";
 // import initializeSocket from "./Services/socketService.js";
 import authRoutes from "./Routes/authRoutes.js";
@@ -28,6 +29,7 @@ const server = http.createServer(app);
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
+app.use(cors());
 
 // Basic Route
 app.get("/", (req, res) => {
