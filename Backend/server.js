@@ -6,7 +6,6 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import http from "http";
 // import initializeSocket from "./Services/socketService.js";
-import authRoutes from "./Routes/authRoutes.js";
 import repoRoutes from "./Routes/repoRoutes.js";
 import contributionRoutes from "./Routes/contributionRoutes.js";
 import userRoutes from "./Routes/userRoutes.js";
@@ -48,7 +47,6 @@ app.get("/api/health", async (req, res) => {
 });
 
 // Use routes
-app.use("/api/auth", authRoutes);
 app.use("/api/repo", repoRoutes);
 app.use("/api/contri", contributionRoutes);
 app.use("/api/user", userRoutes);
