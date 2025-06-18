@@ -1,6 +1,5 @@
 import { Octokit } from "octokit";
 import dotenv from "dotenv";
-import Repository from "../models/Repository.js";
 import fetch from "node-fetch";
 
 dotenv.config();
