@@ -227,7 +227,7 @@ export default function GitHubDashboard() {
     );
 
     setImpactScore(total);
-    console.log("Impact Score:", total);
+    // console.log("Impact Score:", total);
   }
 
   async function fetchUserData() {
