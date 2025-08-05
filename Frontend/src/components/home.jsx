@@ -631,12 +631,12 @@ export default function GitHubDashboard() {
                           Impact Score Calculation:
                         </div>
                         <div className="text-gray-300">
-                          • Stars & Forks (21.1%)
+                          • Stars & Forks (20%)
                           <br />
                           • Code Contributions (40%)
                           <br />
-                          • PR Success Rate (22.2%)
-                          <br />• Commits (16.7%)
+                          • PR Success Rate (15%)
+                          <br />• Commits (25%)
                         </div>
 
                         <div className="absolute top-full left-1/2 transform -translate-x-1/2 border-4 border-transparent border-t-gray-900"></div>
